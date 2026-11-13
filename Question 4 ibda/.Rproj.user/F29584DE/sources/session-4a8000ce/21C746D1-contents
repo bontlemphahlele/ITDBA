@@ -1,0 +1,114 @@
+#load data
+install.packages(c("DBI", "RPostgres","rstudioapi"))
+
+library(DBI)
+library(RPostgres)
+library(dplyr)
+library("rstudioapi")
+#configure- used 
+password <- rstudioapi::askForPassword(
+  "Enter your Layerbase password"
+)
+
+con <- dbConnect(
+  RPostgres::Postgres(),
+  dbname = "q4_3",
+  host = "q4-3-very-bath.sage.cloud.layerbase.dev",
+  port = 5432,
+  user = "postgres",
+  password = password,
+  sslmode = "require"
+)
+dbIsValid(con)
+
+#check existing table
+dbIsValid(con)
+
+dbListTables(con)
+
+dbGetQuery(con, "
+  SELECT COUNT(*) AS total_articles
+  FROM plos_articles;
+")
+
+#load dataset
+data <- read.csv(
+  "C:/Users/27661/OneDrive - Eduvos/Question 4 ibda/artificial_intelligence_cleaned.csv",
+  stringsAsFactors = FALSE
+)
+
+# Inspect the dataset
+dim(data)
+names(data)
+str(data)
+
+# Inspect publication dates
+head(data$publication_date)
+
+#prepare data
+# Convert publication_date to Date format
+data$publication_date <- as.Date(
+  data$publication_date,
+  format = "%Y-%m-%d"
+)
+
+# Check the conversion
+str(data$publication_date)
+
+# Check for missing dates
+sum(is.na(data$publication_date))
+
+# Check for duplicate DOIs
+sum(duplicated(data$article_doi))
+
+#import to PostgresSQL
+# Check how many records are already in the table
+existing_rows <- dbGetQuery(
+  con,
+  "SELECT COUNT(*) AS total FROM plos_articles"
+)$total
+
+# Only import if the table is empty
+if (existing_rows == 0) {
+  
+  dbAppendTable(
+    con,
+    "plos_articles",
+    data
+  )
+  
+  print("CSV imported successfully!")
+  
+} else {
+  
+  print("Table already contains records. Import skipped.")
+  
+}
+
+#VERIFY 
+dbGetQuery(con, "
+  SELECT COUNT(*) AS total_articles
+  FROM plos_articles;
+")
+#verify
+existing_rows <- dbGetQuery(
+  con,
+  
+  "SELECT COUNT(*) AS total FROM plos_articles"
+)$total
+
+print(existing_rows)
+
+# Import all 25 cleaned articles into PostgreSQL
+dbAppendTable(
+  con,
+  "plos_articles",
+  data
+)
+
+# Confirm successful import
+dbGetQuery(
+  con,
+  "SELECT COUNT(*) AS total_articles
+   FROM plos_articles;"
+)

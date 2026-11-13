@@ -1,0 +1,43 @@
+
+# HADOOP MAPREDUCE - MAPPER
+
+args <- commandArgs(trailingOnly = TRUE)
+
+keyword <- if (length(args) > 0) {
+  tolower(args[1])
+} else {
+  "africa"
+}
+
+if (trimws(keyword) == "") {
+  stop("Please provide a search keyword.")
+}
+
+input_lines <- readLines("stdin", warn = FALSE)
+
+for (line in input_lines) {
+  
+  fields <- strsplit(line, "\t", fixed = TRUE)[[1]]
+  
+  if (length(fields) < 3) next
+  
+  document <- fields[1]
+  row_number <- fields[2]
+  content <- paste(fields[3:length(fields)], collapse = "\t")
+  
+  matches <- gregexpr(keyword, tolower(content), fixed = TRUE)[[1]]
+  
+  if (matches[1] != -1) {
+    
+    for (column_number in matches) {
+      
+      cat(
+        document, "\t",
+        sprintf("%08d", as.integer(row_number)), "\t",
+        sprintf("%08d", column_number),
+        "\n",
+        sep = ""
+      )
+    }
+  }
+}

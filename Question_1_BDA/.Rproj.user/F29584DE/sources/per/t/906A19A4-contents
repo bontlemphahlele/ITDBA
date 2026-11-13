@@ -1,0 +1,69 @@
+# ============================================================
+# HADOOP STREAMING TEST SCRIPT
+# ============================================================
+
+# 1. Test the Hadoop Mapper locally using the generated tsv file
+test_hadoop_mapper <- function(input_file = "hadoop_input.tsv", keyword = "africa") {
+  
+  if (!file.exists(input_file)) {
+    stop("Input file does not exist. Please run the input preparation step first.")
+  }
+  
+  lines <- readLines(input_file, warn = FALSE)
+  search_keyword <- tolower(keyword)
+  emitted_records <- c()
+  
+  for (line in lines) {
+    fields <- strsplit(line, "\t", fixed = TRUE)[[1]]
+    if (length(fields) < 3) next
+    
+    document <- fields[1]
+    row_number <- fields[2]
+    content <- paste(fields[3:length(fields)], collapse = "\t")
+    
+    matches <- gregexpr(search_keyword, tolower(content), fixed = TRUE)[[1]]
+    
+    if (matches[1] != -1) {
+      for (column_number in matches) {
+        # Format with zero-padding to mirror Hadoop streaming keys
+        record <- paste0(document, "\t", sprintf("%08d", as.integer(row_number)), "\t", sprintf("%08d", column_number))
+        emitted_records <- c(emitted_records, record)
+      }
+    }
+  }
+  
+  cat("Mapper test completed. Total records emitted:", length(emitted_records), "\n")
+  return(emitted_records)
+}
+
+
+# 2. Test the Hadoop Reducer locally by processing the emitted mapper records
+test_hadoop_reducer <- function(mapper_outputs) {
+  if (length(mapper_outputs) == 0) {
+    cat("No records received to reduce.\n")
+    return(NULL)
+  }
+  
+  # Deduplicate and sort the records
+  reduced_results <- sort(unique(mapper_outputs))
+  
+  cat("Reducer test completed. Total unique records after reduction:", length(reduced_results), "\n\n")
+  cat("Final Reduced Output:\n")
+  cat(reduced_results, sep = "\n")
+  
+  return(reduced_results)
+}
+
+
+# ============================================================
+# EXECUTE THE TESTS IN RSTUDIO
+# ============================================================
+
+# Define keyword
+keyword_to_test <- "africa"
+
+# Run mapper test
+mapper_output_data <- test_hadoop_mapper("hadoop_input.tsv", keyword_to_test)
+
+# Pass mapper output into the reducer test
+final_test_output <- test_hadoop_reducer(mapper_output_data)

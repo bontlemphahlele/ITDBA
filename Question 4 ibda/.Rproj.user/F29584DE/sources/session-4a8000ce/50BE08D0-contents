@@ -1,0 +1,27 @@
+
+# MAPREDUCE PROJECT
+# Step 1: Load and Inspect the News Article Documents
+
+# 1. Identify all text documents
+files <- list.files(
+  path = getwd(),
+  pattern = "\\.txt$",
+  full.names = TRUE
+)
+
+# 2. Display document names
+print(files)
+
+# 3. Count the documents
+cat("Number of articles:", length(files), "\n")
+
+# 4. Read the first article
+article1 <- readLines(files[1], warn = FALSE)
+
+# 5. Display the first 10 lines
+cat("\nFirst 10 lines of doc1:\n")
+print(head(article1, 10))
+
+# 6. Display the total number of lines
+cat("\nTotal lines in doc1:", length(article1), "\n")
+

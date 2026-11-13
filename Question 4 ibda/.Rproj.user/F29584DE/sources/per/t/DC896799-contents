@@ -1,0 +1,224 @@
+
+# QUESTION 2: TEXT MINING AND TOPIC MODELLING USING LDA
+
+# STEP 1: INSTALL AND LOAD REQUIRED PACKAGES
+packages <- c(
+  "tm",
+  "dplyr",
+  "tidytext",
+  "topicmodels",
+  "ggplot2",
+  "wordcloud",
+  "RColorBrewer",
+  "slam",
+  "farver",
+  "reshape2"
+)
+
+# Check and install missing packages
+for (pkg in packages) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    install.packages(pkg, repos = "https://cloud.r-project.org")
+  }
+}
+
+# Load required packages
+library(tm)
+library(dplyr)
+library(tidytext)
+library(topicmodels)
+library(ggplot2)
+library(wordcloud)
+library(RColorBrewer)
+library(slam)
+library(farver)
+library(reshape2)
+
+cat("All required packages are installed and loaded.\n")
+
+# QUESTION 2.1: LOAD NEWS FILES
+
+# Identify all 10 news text files
+news_files <- list.files(
+  path = getwd(),
+  pattern = "^news_.*\\.txt$",
+  full.names = TRUE
+)
+
+# Read the content of each file
+news_content <- vapply(
+  news_files,
+  function(file) {
+    paste(
+      readLines(file, warn = FALSE, encoding = "UTF-8"),
+      collapse = " "
+    )
+  },
+  character(1)
+)
+
+# Create the data frame
+news_df <- data.frame(
+  file_name = basename(news_files),
+  content = news_content,
+  stringsAsFactors = FALSE
+)
+
+# Inspect the data frame
+head(news_df)
+dim(news_df)
+
+
+# QUESTION 2.1: TEXT PREPROCESSING
+
+# Create the text corpus
+news_corpus <- VCorpus(
+  VectorSource(news_df$content)
+)
+
+# Convert text to lowercase
+news_corpus <- tm_map(
+  news_corpus,
+  content_transformer(tolower)
+)
+
+# Remove URLs
+news_corpus <- tm_map(
+  news_corpus,
+  content_transformer(function(x) {
+    gsub("https?://\\S+|www\\.\\S+", "", x)
+  })
+)
+
+# Remove numbers
+news_corpus <- tm_map(news_corpus, removeNumbers)
+
+# Remove punctuation
+news_corpus <- tm_map(news_corpus, removePunctuation)
+
+# Remove English stopwords
+news_corpus <- tm_map(
+  news_corpus,
+  removeWords,
+  stopwords("en")
+)
+
+# Remove extra whitespace
+news_corpus <- tm_map(news_corpus, stripWhitespace)
+
+# Store cleaned text in the data frame
+news_df$cleaned_content <- vapply(
+  news_corpus,
+  function(x) as.character(x$content),
+  character(1)
+)
+
+# Display cleaned articles
+head(news_df[, c("file_name", "cleaned_content")])
+
+# Check data frame dimensions
+dim(news_df)
+
+# QUESTION 2.2: CREATE DOCUMENT-TERM MATRIX
+
+# Create a corpus using the cleaned news articles
+clean_corpus <- VCorpus(
+  VectorSource(news_df$cleaned_content)
+)
+
+# Create the Document-Term Matrix
+dtm <- DocumentTermMatrix(clean_corpus)
+
+# Inspect the Document-Term Matrix
+dim(dtm)
+
+# Check the number of words in each document
+slam::row_sums(dtm)
+
+
+# Create the LDA model
+# Build the LDA model
+lda_model <- LDA(
+  dtm,
+  k = 5,
+  method = "Gibbs",
+  control = list(
+    seed = 1234,
+    burnin = 500,
+    iter = 2000,
+    thin = 100
+  )
+)
+# Display the LDA model
+lda_model
+
+# Extract word probabilities for each topic
+lda_terms <- tidy(lda_model, matrix = "beta")
+
+# Identify the top 10 words for each topic
+top_terms <- lda_terms %>%
+  group_by(topic) %>%
+  slice_max(beta, n = 10, with_ties = FALSE) %>%
+  arrange(topic, desc(beta))
+
+# Display the results
+print(top_terms, n = 50)
+
+# QUESTION 2.3: VISUALISATION 1 - TOP WORDS BAR CHART
+
+# Create the bar chart
+topic_bar_plot <- top_terms %>%
+  mutate(term = tidytext::reorder_within(term, beta, topic)) %>%
+  ggplot(aes(x = term, y = beta)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  facet_wrap(~ topic, scales = "free_y") +
+  tidytext::scale_x_reordered() +
+  labs(
+    title = "Top 10 Words per Topic",
+    subtitle = "Word probability distribution across five LDA topics",
+    x = "Keywords",
+    y = "Word Probability"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    strip.text = element_text(face = "bold")
+  )
+
+# Save the visualisation
+ggsave(
+  "lda_top_words_bar_chart.png",
+  plot = topic_bar_plot,
+  width = 12,
+  height = 8,
+  dpi = 300
+)
+
+
+# word cloud
+for (topic_num in unique(top_terms$topic)) {
+  
+  topic_data <- subset(top_terms, topic == topic_num)
+  
+  png(
+    paste0("lda_topic_", topic_num, "_wordcloud.png"),
+    width = 1200,
+    height = 900,
+    res = 150
+  )
+  
+  wordcloud(
+    words = topic_data$term,
+    freq = topic_data$beta,
+    scale = c(4, 0.8),
+    min.freq = 0,
+    max.words = 10,
+    random.order = FALSE,
+    colors = brewer.pal(8, "Dark2")
+  )
+  
+  title(main = paste("Top Keywords - Topic", topic_num))
+  
+  dev.off()
+}

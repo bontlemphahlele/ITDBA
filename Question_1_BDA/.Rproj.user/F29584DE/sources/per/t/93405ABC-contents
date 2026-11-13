@@ -1,0 +1,19 @@
+# QUESTION 2: TEXT PREPROCESSING, LDA TOPIC MODELING, & VISUALIZATION
+# Install all required packages
+install.packages(c("tm", "dplyr", "tidytext", "topicmodels",
+                   "ggplot2", "wordcloud", "RColorBrewer","janeaustenr","stringi", "farver",type = "binary"))
+#Load libraries
+library(tm)
+library(dplyr)
+library(tidytext)
+library(topicmodels)
+library(ggplot2)
+#QUESTION2.1
+# Check current working directory
+getwd()
+
+# List folders in the working directory
+list.dirs(
+  path = getwd(),
+  recursive = FALSE
+)

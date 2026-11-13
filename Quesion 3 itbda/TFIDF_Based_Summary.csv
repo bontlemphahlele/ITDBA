@@ -1,0 +1,6 @@
+"sentence_id","sentence","tfidf_score","word_count"
+32,"It seems virtually impossible to distinguish between these mechanisms on the basis of observational clinical data alone [1,6].",0.56593778163306,9
+312,"Thus, the first cocktail markedly increases the resistance to the second cocktail even before this IV cocktail is administered.",0.543087883773428,8
+454,"Phages are lost from the inoculum at rate d0, a fraction f appears in the serum, where they are lost at rate .",0.536494616237846,10
+359,"This is clinically important because using lower doses would reduce the problem of residual endotoxin in phage preparations.",0.523804582787871,8
+158,"The horizontal black dashed lines represent the low and the high CBC, and , respectively (the high CBC is absent when ).",0.51646081623327,9

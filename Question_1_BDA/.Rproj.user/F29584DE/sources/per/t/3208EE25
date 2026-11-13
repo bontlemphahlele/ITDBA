@@ -1,0 +1,26 @@
+{
+    "id": "3208EE25",
+    "path": "C:/Users/27661/OneDrive - Eduvos/map_reduce_test_docs/hadoop_mapper.R",
+    "project_path": "hadoop_mapper.R",
+    "type": "r_source",
+    "hash": "4090214938",
+    "contents": "",
+    "dirty": false,
+    "created": 1794245715214.0,
+    "source_on_save": true,
+    "relative_order": 7,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "46,0",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1794404948,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1794404948327,
+    "read_only": false,
+    "read_only_alternatives": []
+}

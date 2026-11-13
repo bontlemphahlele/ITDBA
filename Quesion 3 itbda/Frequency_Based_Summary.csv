@@ -1,0 +1,6 @@
+"sentence_id","sentence","score","word_count"
+355,"Indeed, once the infection rate of the phages suffices for controlling sensitive bacteria, a further increase of the infection rate is less important than extending the therapy with additional phages (Fig 6).",0.0146064489243111,15
+169,"If the phages are able to infect the bacteria they will expand rapidly in a few generations, even in a model where we limit the replication rate of phages to h–1.",0.0136811149469377,11
+222,"At high phage densities, i.e., , the maximum infection rate per phage group approaches (summing up to a force of infection for all phages).",0.0135390472943216,11
+246,"Summarizing, whether or not phages can control a rampant bacterial infection depends both on their infection rate and on the rate by which the bacteria develop resistance, as phage therapy will fail as soon as the resistant bacteria breach the upper CBC.",0.0133056504364521,21
+241,"In the absence of resistance, phages with a higher infection rate of suffice to control the bacterial infection (Fig 3C), but in the presence of resistance this infection rate need not be sufficient (Fig 3D), because the bacteria rapidly become resistant and the phages go extinct (S2B Fig).",0.0127707454289733,25
